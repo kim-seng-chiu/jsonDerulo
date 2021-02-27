@@ -1,0 +1,19 @@
+{
+  "name": "jsonderulo",
+  "version": "1.0.0",
+  "description": "Tries to return whatever you pass it as a JSON object",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kim-seng-chiu/jsonDerulo.git"
+  },
+  "author": "kim",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kim-seng-chiu/jsonDerulo/issues"
+  },
+  "homepage": "https://github.com/kim-seng-chiu/jsonDerulo#readme"
+}
