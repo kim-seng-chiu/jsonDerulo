@@ -1,5 +1,5 @@
 {
-  "name": "jsonderulo",
+  "name": "@kim-seng-chiu/jsonderulo",
   "version": "1.0.0",
   "description": "Tries to return whatever you pass it as a JSON object",
   "main": "index.js",
@@ -11,12 +11,13 @@
     "url": "git+https://github.com/kim-seng-chiu/jsonDerulo.git"
   },
   "author": "kim",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kim-seng-chiu/jsonDerulo/issues"
   },
   "homepage": "https://github.com/kim-seng-chiu/jsonDerulo#readme",
   "dependencies": {
     "prettier": "^2.2.1"
-  }
+  },
+  "devDependencies": {}
 }
