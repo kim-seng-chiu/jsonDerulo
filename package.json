@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/kim-seng-chiu/jsonDerulo/issues"
   },
-  "homepage": "https://github.com/kim-seng-chiu/jsonDerulo#readme"
+  "homepage": "https://github.com/kim-seng-chiu/jsonDerulo#readme",
+  "dependencies": {
+    "prettier": "^2.2.1"
+  }
 }
