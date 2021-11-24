@@ -5,11 +5,23 @@ describe("mapper", () => {
     it("Should map the input object the new template keys and return it as an object", () => {
       expect(mapper(input1, template)).toMatchObject({
         Title: "Catcher in the Rye",
-        Author: "J.D. Salinger",
+        Author: {
+          Name: "J.D. Salinger",
+          Origin: "USA"
+        },
         YearPublished: "1951",
         IsFiction: true,
         NumberOfPages: 234
       });
     });
+    // it("Should map the input object the new template keys and return it as an object", () => {
+    //   expect(mapper(input1, template)).toMatchObject({
+    //     Title: "Catcher in the Rye",
+    //     Author: "J.D. Salinger",
+    //     YearPublished: "1951",
+    //     IsFiction: true,
+    //     NumberOfPages: 234
+    //   });
+    // });
   });
 });

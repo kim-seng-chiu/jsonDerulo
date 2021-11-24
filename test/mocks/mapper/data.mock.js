@@ -2,6 +2,7 @@ const input1 = {
     "book_title": "Catcher in the Rye",
     "published": "1951",
     "writer": "J.D. Salinger",
+    "writer_origin": "USA",
     "fiction": true,
     "language": "English",
     "pages": 234
@@ -10,7 +11,12 @@ const input1 = {
 const input2 = {
     "title": "Nineteen Eighty-Four",
     "published": "1949",
-    "author": "George Orwell",
+    "author": {
+        "details": {
+            "name": "George Orwell",
+            "from": "England"
+        }
+    },
     "fiction": true,
     "language": "English",
     "no-of-pages": 328
@@ -23,9 +29,21 @@ const template = {
         "description": "The title of the book"
     },
     "Author": {
-        "type": "string",
+        "type": "object",
         "mapItems": ["writer", "author"],
-        "description": "Name of the person who wrote the book"
+        "description": "Details of the person who wrote the book",
+        "properties": {
+            "Name": {
+                "type": "string",
+                "mapItems": [],
+                "description": "Name of person who wrote the book"
+            },
+            "Origin": {
+                "type": "string",
+                "mapItems": [],
+                "description": "Birthplace of person who wrote the book"
+            }
+        }
     },
     "YearPublished": {
         "type": "number",
