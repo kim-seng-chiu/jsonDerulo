@@ -23,27 +23,52 @@ const input2 = {
 };
 
 const template = {
+    "OverallRating" : {
+        "type": "number",
+        "mapItems": ["rating[score]"],
+        "description": "",
+    },
+    "AdditionalInfo": {
+        "type": "object",
+        "mapItems": ["details"],
+        "description": "",
+        "properties": {
+            "Genre": {
+                "type": "string",
+                "mapItems": ["genre"]
+            },
+            "Publisher": {
+                "type": "string",
+                "mapItems": ["publisher"]
+            }
+        }
+    },
     "Title": {
         "type": "string",
         "mapItems": ["book_title"],
         "description": "The title of the book"
     },
+    // "Author": {
+    //     "type": "object",
+    //     "mapItems": ["writer", "author"],
+    //     "description": "Details of the person who wrote the book",
+    //     "properties": {
+    //         "Name": {
+    //             "type": "string",
+    //             "mapItems": [],
+    //             "description": "Name of person who wrote the book"
+    //         },
+    //         "Origin": {
+    //             "type": "string",
+    //             "mapItems": [],
+    //             "description": "Birthplace of person who wrote the book"
+    //         }
+    //     }
+    // },
     "Author": {
-        "type": "object",
+        "type": "string",
         "mapItems": ["writer", "author"],
         "description": "Details of the person who wrote the book",
-        "properties": {
-            "Name": {
-                "type": "string",
-                "mapItems": [],
-                "description": "Name of person who wrote the book"
-            },
-            "Origin": {
-                "type": "string",
-                "mapItems": [],
-                "description": "Birthplace of person who wrote the book"
-            }
-        }
     },
     "YearPublished": {
         "type": "number",
@@ -59,7 +84,7 @@ const template = {
         "type": "number",
         "mapItems": ["pages", "no-of-pages"],
         "description": "Number of pages in the published book"
-    }
+    },
 };
 
 module.exports = {
