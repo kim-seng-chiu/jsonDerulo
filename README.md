@@ -6,7 +6,7 @@ This package takes in data and returns it as a JSON object. Kind of like how Jas
 
 I am not sure if the name of this package infringes on anything.
 
-# `noKeys`
+## `noKeys`
 This method can be used when the keys for the object are not important. It will determine the data type that is passed to the function.
 
 *Example*
@@ -19,7 +19,7 @@ console.log(returnObject);
 // { 0: "Please put this in an object" }
 ```
 
-# `specifiedKeys`
+## `specifiedKeys`
 *Example*
 ```javascript
 const jd = require("jsonDerulo");
@@ -30,3 +30,24 @@ console.log(toDatabase);
 // prints
 // [{"id":1,"name":"Bethany","age":23},{"id":2,"name":"Mike","age":35},{"id":3,"name":"Daniel","age":31}]
 ```
+
+## `mapper`
+The idea is for this function to be used with a large dataset of objects that require to be mapped to a new schema.
+
+The main function `mapper` takes two arguments, currently.
+* `input` is the "raw" or original data.
+* `schema` is the defined schema that the original data requires to be mapped to. This is defined [here](#schema-for-mapper).
+* `inputKeys` is to get the parent levels keys from the input data.
+
+`mapper` loops over the defined schema to find and match the corresponding values from the input.
+
+### Schema for mapper
+* The template should be a JSON object
+* Each `key` should have an object with the following attributes
+
+| attribute | data type | required | values |
+| --------- | --------- | -------- | ------ |
+| type | string | yes | "string", "number", "boolean", "datetime", "object", "array" |
+| mapItems | array(strings) | no | - |
+| description | string | no | - |
+| properties | object | yes for data type object | - |
