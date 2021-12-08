@@ -5,7 +5,7 @@ const bookTemplate = {
         "properties": {
             "Name": {
                 "type": "string",
-                "mapItems": ["writer", "author.details.name"],
+                "mapItems": ["writer", "author.details.name","author"],
                 "description": "Name of person who wrote the book"
             },
             "Origin": {
