@@ -44,6 +44,7 @@ The main function `mapper` takes two arguments, currently.
 ### Schema for mapper
 * The template should be a JSON object
 * Each `key` should have an object with the following attributes
+* Refer to [JSON data types](https://datatracker.ietf.org/doc/html/rfc7159#:~:text=JSON%20can%20represent%20four%20primitive%20types%20(strings%2C%20numbers%2C%20booleans%2C%0A%20%20%20and%20null)%20and%20two%20structured%20types%20(objects%20and%20arrays).)
 
 | attribute | data type | required | values |
 | --------- | --------- | -------- | ------ |
@@ -51,5 +52,3 @@ The main function `mapper` takes two arguments, currently.
 | mapItems | array(strings) | no | - |
 | description | string | no | - |
 | properties | object | yes for data type object | - |
-
-https://datatracker.ietf.org/doc/html/rfc7159#:~:text=JSON%20can%20represent%20four%20primitive%20types%20(strings%2C%20numbers%2C%20booleans%2C%0A%20%20%20and%20null)%20and%20two%20structured%20types%20(objects%20and%20arrays).
