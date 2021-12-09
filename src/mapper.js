@@ -11,7 +11,7 @@ function mapper(input, schema) {
       case "boolean":
       case "array":
         const resolvedPath = mapItems.find(mapItem => get(input, mapItem) !== undefined)
-        mappedObject[schemaKey] = resolvedPath ? get(input, resolvedPath) : undefined;
+        mappedObject[schemaKey] = resolvedPath ? get(input, resolvedPath) : null;
         return;
       case "object":
         mappedObject[schemaKey] = mapper(
@@ -19,6 +19,7 @@ function mapper(input, schema) {
           schema[schemaKey].properties
         );
         return;
+      // case "array(objects)":
     }
   });
   return mappedObject;

@@ -10,7 +10,7 @@ const bookTemplate = {
             },
             "Origin": {
                 "type": "string",
-                "mapItems": ["writer_orign", "author_origin", "author.details.from"],
+                "mapItems": ["writer_origin", "author_origin", "author.details.from"],
                 "description": "Birthplace of person who wrote the book"
             }
         }

@@ -5,10 +5,10 @@ describe("mapper", () => {
   describe("When given an input object and a template to match", () => {
     it("Should map the input object the new template keys and return it as an object", () => {
       expect(mapper(input1, bookTemplate)).toMatchObject({
-        OverallRating: undefined,
-        AdditionalInfo: { Genre: undefined, Publisher: undefined },
+        OverallRating: null,
+        AdditionalInfo: { Genre: null, Publisher: null },
         Title: "Catcher in the Rye",
-        Author: { Name: "J.D. Salinger", Origin: undefined },
+        Author: { Name: "J.D. Salinger", Origin: null },
         YearPublished: "1951",
         IsFiction: true,
         NumberOfPages: 234,
@@ -16,10 +16,10 @@ describe("mapper", () => {
     });
     it("Should map the input object to new template keys with the desired data structure", () => {
       expect(mapper(input2, bookTemplate)).toMatchObject({
-        OverallRating: undefined,
+        OverallRating: null,
         AdditionalInfo: {
-          Genre: undefined,
-          Publisher: undefined,
+          Genre: null,
+          Publisher: null,
         },
         Title: "Nineteen Eighty-Four",
         Author: { Name: "George Orwell", Origin: "England" },
