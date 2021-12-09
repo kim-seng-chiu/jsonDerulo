@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kim-seng-chiu/jsonDerulo#readme",
   "dependencies": {
+    "lodash.get": "^4.4.2",
     "prettier": "^2.2.1"
   },
   "devDependencies": {
