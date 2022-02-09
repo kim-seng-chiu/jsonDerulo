@@ -15,7 +15,7 @@ function mapper(input, schema) {
           mappedObject[schemaKey] = schema[schemaKey].staticValue;
           return;
         }
-        const resolvedPath = mapItems.find(mapItem => get(input, mapItem) !== undefined)
+        const resolvedPath = mapItems ? mapItems.find(mapItem => get(input, mapItem) !== undefined) : false;
         let resolvedValued = resolvedPath ? get(input, resolvedPath) : defaultValue;
         if(schema[schemaKey].mappingValueRules) {
           const validMapRule = schema[schemaKey].mappingValueRules.find(rule => rule.original.includes(resolvedValued));
