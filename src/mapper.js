@@ -5,13 +5,25 @@ function mapper(input, schema) {
   Object.keys(schema).forEach((schemaKey) => {
     const dataType = schema[schemaKey].type;
     const mapItems = schema[schemaKey].mapItems;
+    const defaultValue = schema[schemaKey].defaultValue ?? null;
     switch (dataType) {
       case "string":
       case "number":
       case "boolean":
       case "array":
+        if(schema[schemaKey].staticValue) {
+          mappedObject[schemaKey] = schema[schemaKey].staticValue;
+          return;
+        }
         const resolvedPath = mapItems.find(mapItem => get(input, mapItem) !== undefined)
-        mappedObject[schemaKey] = resolvedPath ? get(input, resolvedPath) : null;
+        let resolvedValued = resolvedPath ? get(input, resolvedPath) : defaultValue;
+        if(schema[schemaKey].mappingValueRules) {
+          const validMapRule = schema[schemaKey].mappingValueRules.find(rule => rule.original.includes(resolvedValued));
+          if(validMapRule) {
+            resolvedValue = validMapRule.target;
+          }
+        }
+        mappedObject[schemaKey] = resolvedValue;
         return;
       case "object":
         mappedObject[schemaKey] = mapper(
