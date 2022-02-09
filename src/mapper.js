@@ -16,7 +16,7 @@ function mapper(input, schema) {
           return;
         }
         const resolvedPath = mapItems ? mapItems.find(mapItem => get(input, mapItem) !== undefined) : false;
-        let resolvedValued = resolvedPath ? get(input, resolvedPath) : defaultValue;
+        let resolvedValue = resolvedPath ? get(input, resolvedPath) : defaultValue;
         if(schema[schemaKey].mappingValueRules) {
           const validMapRule = schema[schemaKey].mappingValueRules.find(rule => rule.original.includes(resolvedValued));
           if(validMapRule) {
