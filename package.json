@@ -1,6 +1,6 @@
 {
   "name": "@kim-seng-chiu/jsonderulo",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Tries to return whatever you pass it as a JSON object",
   "main": "index.js",
   "scripts": {
