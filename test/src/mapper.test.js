@@ -1,6 +1,8 @@
+/** @format */
+
 const mapper = require("../../src/mapper");
 const { input1, input2, input3 } = require("../mocks/mapper/data.mock");
-const {bookTemplate} = require("../mocks/mapper/template.mock");
+const { bookTemplate } = require("../mocks/mapper/template.mock");
 describe("mapper", () => {
   describe("When given an input object and a template to match", () => {
     it("Should map the input object the new template keys and return it as an object", () => {
@@ -8,7 +10,7 @@ describe("mapper", () => {
         OverallRating: null,
         AdditionalInfo: { Genre: null, Publisher: null },
         Title: "Catcher in the Rye",
-        Author: { Name: "J.D. Salinger", Origin: null },
+        Author: { Name: "J.D. Salinger", Origin: "USA" },
         YearPublished: "1951",
         IsFiction: true,
         NumberOfPages: 234,
