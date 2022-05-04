@@ -45,4 +45,109 @@ describe("mapper", () => {
       });
     });
   });
+
+  describe("GIVEN an object of arrays", () => {
+    const template = {
+      configuration: {
+        type: "object",
+        properties: {
+          LifecycleConfiguration: {
+            type: "object",
+            properties: {
+              Rules: {
+                type: "set",
+                mapItems: ["configuration.lifecycle_rule"],
+                properties: {
+                  AbortIncompleteMultipartUpload: {
+                    type: "object",
+                    mapItems: ["abort_incomplete_multipart_upload[0]"],
+                    properties: {
+                      DaysAfterInitiation: {
+                        type: "number",
+                        mapItems: ["days_after_initiation"],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    describe("AND one lifecycle_rule as input", () => {
+      it("SHOULD add it to Rules", () => {
+        const input = {
+          configuration: {
+            lifecycle_rule: [
+              {
+                abort_incomplete_multipart_upload: [
+                  {
+                    days_after_initiation: 2,
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          Rules: [
+            {
+              AbortIncompleteMultipartUpload: {
+                DaysAfterInitiation: 2,
+              },
+            },
+          ],
+        };
+        expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+          expected
+        );
+      });
+      describe("AND more than one lifecycle_rule as input", () => {
+        it("SHOULD add each to Rules", () => {
+          const input = {
+            configuration: {
+              lifecycle_rule: [
+                {
+                  abort_incomplete_multipart_upload: [
+                    {
+                      days_after_initiation: 30,
+                    },
+                  ],
+                },
+                {
+                  abort_incomplete_multipart_upload: [
+                    {
+                      days_after_initiation: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+          };
+
+          const result = mapper(input, template);
+          const expected = {
+            Rules: [
+              {
+                AbortIncompleteMultipartUpload: {
+                  DaysAfterInitiation: 30,
+                },
+              },
+              {
+                AbortIncompleteMultipartUpload: {
+                  DaysAfterInitiation: 2,
+                },
+              },
+            ],
+          };
+          expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+            expected
+          );
+        });
+      });
+    });
+  });
 });
