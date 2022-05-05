@@ -46,7 +46,7 @@ describe("mapper", () => {
     });
   });
 
-  describe("GIVEN an object of arrays", () => {
+  describe("GIVEN a schema of type 'set'", () => {
     const template = {
       configuration: {
         type: "object",
@@ -65,6 +65,32 @@ describe("mapper", () => {
                       DaysAfterInitiation: {
                         type: "number",
                         mapItems: ["days_after_initiation"],
+                      },
+                    },
+                  },
+                  Transitions: {
+                    type: "set",
+                    mapItems: ["transition"],
+                    properties: {
+                      StorageClass: {
+                        type: "string",
+                        enum: [
+                          "DEEP_ARCHIVE",
+                          "GLACIER",
+                          "GLACIER_IR",
+                          "INTELLIGENT_TIERING",
+                          "ONEZONE_IA",
+                          "STANDARD_IA",
+                        ],
+                        mapItems: ["storage_class"],
+                      },
+                      TransitionDate: {
+                        type: "string",
+                        mapItems: ["date"],
+                      },
+                      TransitionInDays: {
+                        type: "number",
+                        mapItems: ["days"],
                       },
                     },
                   },
@@ -92,6 +118,7 @@ describe("mapper", () => {
         };
 
         const result = mapper(input, template);
+
         const expected = {
           Rules: [
             {
@@ -105,48 +132,92 @@ describe("mapper", () => {
           expected
         );
       });
-      describe("AND more than one lifecycle_rule as input", () => {
-        it("SHOULD add each to Rules", () => {
-          const input = {
-            configuration: {
-              lifecycle_rule: [
+    });
+    describe("AND more than one lifecycle_rule as input", () => {
+      it("SHOULD add each to Rules", () => {
+        const input = {
+          configuration: {
+            lifecycle_rule: [
+              {
+                abort_incomplete_multipart_upload: [
+                  {
+                    days_after_initiation: 30,
+                  },
+                ],
+              },
+              {
+                abort_incomplete_multipart_upload: [
+                  {
+                    days_after_initiation: 2,
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          Rules: [
+            {
+              AbortIncompleteMultipartUpload: {
+                DaysAfterInitiation: 30,
+              },
+            },
+            {
+              AbortIncompleteMultipartUpload: {
+                DaysAfterInitiation: 2,
+              },
+            },
+          ],
+        };
+        expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("AND nested sets", () => {
+      it("SHOULD calculate the nested sets", () => {
+        const input = {
+          configuration: {
+            lifecycle_rule: [
+              {
+                id: "GlacierRule",
+                transition: [
+                  {
+                    days: 1,
+                    storage_class: "GLACIER",
+                  },
+                  {
+                    days: 30,
+                    storage_class: "STANDARD_IA",
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          Rules: [
+            {
+              Transitions: [
                 {
-                  abort_incomplete_multipart_upload: [
-                    {
-                      days_after_initiation: 30,
-                    },
-                  ],
+                  StorageClass: "GLACIER",
+                  TransitionInDays: 1,
                 },
                 {
-                  abort_incomplete_multipart_upload: [
-                    {
-                      days_after_initiation: 2,
-                    },
-                  ],
+                  StorageClass: "STANDARD_IA",
+                  TransitionInDays: 30,
                 },
               ],
             },
-          };
-
-          const result = mapper(input, template);
-          const expected = {
-            Rules: [
-              {
-                AbortIncompleteMultipartUpload: {
-                  DaysAfterInitiation: 30,
-                },
-              },
-              {
-                AbortIncompleteMultipartUpload: {
-                  DaysAfterInitiation: 2,
-                },
-              },
-            ],
-          };
-          expect(result.configuration.LifecycleConfiguration).toStrictEqual(
-            expected
-          );
-        });
+          ],
+        };
+        expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+          expected
+        );
       });
     });
   });

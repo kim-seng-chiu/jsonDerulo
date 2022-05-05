@@ -5,31 +5,47 @@ const get = require("lodash.get");
 const getMapItem = (input, mapItems) => {
   let value;
   if (Array.isArray(mapItems)) {
-    mapItems.forEach((item) => {
+    for (const item of mapItems) {
       value = get(input, item);
       if (value !== undefined) {
-        //return the value for the first mapped item found
-        return value;
+        break;
       }
-    });
+    }
   }
+  //return the value for the first mapped item found
   return value;
 };
 
-const getSet = (inputValue, schemaValue) => {
+const getSet = (input, schemaValue) => {
+  if (schemaValue.mapItems) {
+    let inputValues = getMapItem(input, schemaValue.mapItems);
+    if (Array.isArray(inputValues)) {
+      let resolvedValues = [];
+      inputValues.forEach((inputValue) => {
+        resolvedValues.push(getSetItem(inputValue, schemaValue));
+      });
+      return resolvedValues;
+    }
+  }
+};
+
+const getSetItem = (inputValue, schemaValue) => {
   let resolvedValue = {};
   let result = {};
   for (const ruleKey in schemaValue.properties) {
     const ruleValue = schemaValue.properties[ruleKey];
+    if (ruleValue.type === "set") {
+      const mapSet = getSet(inputValue, ruleValue);
+      if (mapSet) {
+        result[ruleKey] = mapSet;
+      }
+      return result;
+    }
     resolvedValue = getMapItem(inputValue, ruleValue.mapItems);
-    if (typeof resolvedValue === "object") {
-      if (typeof ruleValue.properties === "object") {
-        result[ruleKey] = getSet(resolvedValue, ruleValue);
-      }
-    } else {
-      if (resolvedValue) {
-        result[ruleKey] = resolvedValue;
-      }
+    if (typeof resolvedValue === "object" && ruleValue.properties) {
+      result[ruleKey] = getSetItem(resolvedValue, ruleValue);
+    } else if (resolvedValue) {
+      result[ruleKey] = resolvedValue;
     }
   }
   return result;
@@ -74,18 +90,11 @@ const mapper = (input, schema) => {
         mappedObject[schemaKey] = mapper(input, schemaValue.properties);
         return;
       case "set":
-        if (schemaValue.mapItems) {
-          let inputValues = getMapItem(input, schemaValue.mapItems);
-          let resolvedValues = [];
-          inputValues.forEach((inputValue) => {
-            resolvedValues.push(getSet(inputValue, schemaValue));
-          });
-          mappedObject[schemaKey] = resolvedValues;
-        }
-
+        mappedObject[schemaKey] = getSet(input, schemaValue);
         return;
     }
   });
+
   return mappedObject;
 };
 
