@@ -68,6 +68,11 @@ describe("mapper", () => {
                       },
                     },
                   },
+                  Status: {
+                    type: "string",
+                    mapItems: ["status"],
+                    defaultValue: "Disabled",
+                  },
                   Transitions: {
                     type: "set",
                     mapItems: ["transition"],
@@ -125,6 +130,7 @@ describe("mapper", () => {
               AbortIncompleteMultipartUpload: {
                 DaysAfterInitiation: 2,
               },
+              Status: "Disabled",
             },
           ],
         };
@@ -144,6 +150,7 @@ describe("mapper", () => {
                     days_after_initiation: 30,
                   },
                 ],
+                Status: "Disabled",
               },
               {
                 abort_incomplete_multipart_upload: [
@@ -151,6 +158,7 @@ describe("mapper", () => {
                     days_after_initiation: 2,
                   },
                 ],
+                Status: "Disabled",
               },
             ],
           },
@@ -163,11 +171,13 @@ describe("mapper", () => {
               AbortIncompleteMultipartUpload: {
                 DaysAfterInitiation: 30,
               },
+              Status: "Disabled",
             },
             {
               AbortIncompleteMultipartUpload: {
                 DaysAfterInitiation: 2,
               },
+              Status: "Disabled",
             },
           ],
         };
@@ -202,6 +212,7 @@ describe("mapper", () => {
         const expected = {
           Rules: [
             {
+              Status: "Disabled",
               Transitions: [
                 {
                   StorageClass: "GLACIER",
@@ -212,6 +223,57 @@ describe("mapper", () => {
                   TransitionInDays: 30,
                 },
               ],
+            },
+          ],
+        };
+        expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("AND input is empty and is mapped to a default value", () => {
+      it("SHOULD set the input with the default value", () => {
+        const input = {
+          configuration: {
+            lifecycle_rule: [
+              {
+                id: "GlacierRule",
+                status: "Enabled",
+              },
+            ],
+          },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          Rules: [
+            {
+              Status: "Enabled",
+            },
+          ],
+        };
+        expect(result.configuration.LifecycleConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("AND input is empty and is mapped to a default value", () => {
+      it("SHOULD set the input with the default value", () => {
+        const input = {
+          configuration: {
+            lifecycle_rule: [
+              {
+                id: "GlacierRule",
+              },
+            ],
+          },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          Rules: [
+            {
+              Status: "Disabled",
             },
           ],
         };
