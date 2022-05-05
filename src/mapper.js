@@ -2,6 +2,17 @@
 
 const get = require("lodash.get");
 
+const mapValueRules = (schemaValue, resolvedValue) => {
+  if (schemaValue.mappingValueRules) {
+    const validMapRule = schemaValue.mappingValueRules.find((rule) =>
+      rule.original.includes(resolvedValue)
+    );
+    if (validMapRule) {
+      resolvedValue = validMapRule.target;
+    }
+  }
+  return resolvedValue;
+};
 const getMapItem = (input, mapItems) => {
   let value;
   if (Array.isArray(mapItems)) {
@@ -34,7 +45,9 @@ const getSetItem = (inputValue, schemaValue) => {
   let result = {};
   for (const ruleKey in schemaValue.properties) {
     const ruleValue = schemaValue.properties[ruleKey];
-    if (ruleValue.type === "set") {
+    if (ruleValue.staticValue) {
+      result[ruleKey] = ruleValue.staticValue;
+    } else if (ruleValue.type === "set") {
       const mapSet = getSet(inputValue, ruleValue);
       if (mapSet) {
         result[ruleKey] = mapSet;
@@ -48,6 +61,7 @@ const getSetItem = (inputValue, schemaValue) => {
           resolvedValue = ruleValue.defaultValue;
         }
         if (resolvedValue) {
+          resolvedValue = mapValueRules(schemaValue, resolvedValue);
           result[ruleKey] = resolvedValue;
         }
       }
@@ -79,16 +93,7 @@ const mapper = (input, schema) => {
         let resolvedValue = resolvedPath
           ? get(input, resolvedPath)
           : defaultValue;
-        if (schemaValue.mappingValueRules) {
-          const validMapRule = schema[
-            schemaKey
-          ].mappingValueRules.find((rule) =>
-            rule.original.includes(resolvedValue)
-          );
-          if (validMapRule) {
-            resolvedValue = validMapRule.target;
-          }
-        }
+        resolvedValue = mapValueRules(schemaValue, resolvedValue);
         mappedObject[schemaKey] = resolvedValue;
         return;
       case "object":

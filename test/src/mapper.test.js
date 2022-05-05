@@ -46,6 +46,70 @@ describe("mapper", () => {
     });
   });
 
+  describe("GIVEN key is mapped to a static value", () => {
+    it("SHOULD add the key to the output, even if it is not in the input", () => {
+      const template = {
+        provider: {
+          type: "string",
+          staticValue: "aws",
+        },
+        configuration: {},
+      };
+      const input = {
+        configuration: {},
+      };
+
+      const result = mapper(input, template);
+      const expected = {
+        provider: "aws",
+      };
+      expect(result).toStrictEqual(expected);
+    });
+  });
+
+  describe("GIVEN mappingValueRules is configured", () => {
+    it("SHOULD replace mappingValueRules.original with .target in the input", () => {
+      const template = {
+        configuration: {
+          type: "object",
+          properties: {
+            ObjectLockConfiguration: {
+              type: "object",
+              properties: {
+                ObjectLockEnabled: {
+                  type: "boolean",
+                  defaultValue: "Disabled",
+                  description: "",
+                  mapItems: [
+                    "configuration.object_lock_enabled",
+                    "configuration.object_lock_configuration[0].object_lock_enabled",
+                  ],
+                  mappingValueRules: [
+                    {
+                      original: ["Enabled", "true", true],
+                      target: "Enabled",
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const input = {
+        configuration: { object_lock_enabled: true },
+      };
+
+      const result = mapper(input, template);
+      const expected = {
+        ObjectLockEnabled: "Enabled",
+      };
+      expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+        expected
+      );
+    });
+  });
   describe("GIVEN a schema of type 'set'", () => {
     const template = {
       configuration: {
@@ -231,8 +295,8 @@ describe("mapper", () => {
         );
       });
     });
-    describe("AND input is empty and is mapped to a default value", () => {
-      it("SHOULD set the input with the default value", () => {
+    describe("AND input is populated and is mapped to a default value", () => {
+      it("SHOULD set the input with the populated value", () => {
         const input = {
           configuration: {
             lifecycle_rule: [
