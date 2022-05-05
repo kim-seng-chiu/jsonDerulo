@@ -39,13 +39,18 @@ const getSetItem = (inputValue, schemaValue) => {
       if (mapSet) {
         result[ruleKey] = mapSet;
       }
-      return result;
-    }
-    resolvedValue = getMapItem(inputValue, ruleValue.mapItems);
-    if (typeof resolvedValue === "object" && ruleValue.properties) {
-      result[ruleKey] = getSetItem(resolvedValue, ruleValue);
-    } else if (resolvedValue) {
-      result[ruleKey] = resolvedValue;
+    } else {
+      resolvedValue = getMapItem(inputValue, ruleValue.mapItems);
+      if (typeof resolvedValue === "object" && ruleValue.properties) {
+        result[ruleKey] = getSetItem(resolvedValue, ruleValue);
+      } else {
+        if (!resolvedValue) {
+          resolvedValue = ruleValue.defaultValue;
+        }
+        if (resolvedValue) {
+          result[ruleKey] = resolvedValue;
+        }
+      }
     }
   }
   return result;
