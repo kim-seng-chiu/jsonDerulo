@@ -2,16 +2,17 @@
 
 const get = require("lodash.get");
 
-const mapValueRules = (schemaValue, resolvedValue) => {
+const mapValueRules = (schemaValue, originalValue) => {
+  let newValue = originalValue;
   if (schemaValue.mappingValueRules) {
     const validMapRule = schemaValue.mappingValueRules.find((rule) =>
-      rule.original.includes(resolvedValue)
+      rule.original.includes(originalValue)
     );
     if (validMapRule) {
-      resolvedValue = validMapRule.target;
+      newValue = validMapRule.target;
     }
   }
-  return resolvedValue;
+  return newValue;
 };
 const getMapItem = (input, mapItems) => {
   let value;
@@ -29,42 +30,45 @@ const getMapItem = (input, mapItems) => {
 
 const getSet = (input, schemaValue) => {
   if (schemaValue.mapItems) {
-    let inputValues = getMapItem(input, schemaValue.mapItems);
-    if (Array.isArray(inputValues)) {
+    let inputs = getMapItem(input, schemaValue.mapItems);
+    if (Array.isArray(inputs)) {
       let resolvedValues = [];
-      inputValues.forEach((inputValue) => {
-        resolvedValues.push(getSetItem(inputValue, schemaValue));
+      inputs.forEach((input) => {
+        resolvedValues.push(getSetItem(input, schemaValue));
       });
       return resolvedValues;
     }
   }
 };
 
-const getSetItem = (inputValue, schemaValue) => {
-  let resolvedValue = {};
-  let result = {};
-  for (const ruleKey in schemaValue.properties) {
-    const ruleValue = schemaValue.properties[ruleKey];
-    if (ruleValue.staticValue) {
-      result[ruleKey] = ruleValue.staticValue;
-    } else if (ruleValue.type === "set") {
-      const mapSet = getSet(inputValue, ruleValue);
-      if (mapSet) {
-        result[ruleKey] = mapSet;
-      }
+const getResolvedValue = (input, properties, schemaValue) => {
+  if (properties.staticValue) {
+    return properties.staticValue;
+  } else if (properties.type === "set") {
+    return getSet(input, properties);
+  } else {
+    let resolvedValue = getMapItem(input, properties.mapItems);
+    if (typeof resolvedValue === "object" && properties.properties) {
+      return getSetItem(resolvedValue, properties);
     } else {
-      resolvedValue = getMapItem(inputValue, ruleValue.mapItems);
-      if (typeof resolvedValue === "object" && ruleValue.properties) {
-        result[ruleKey] = getSetItem(resolvedValue, ruleValue);
-      } else {
-        if (!resolvedValue) {
-          resolvedValue = ruleValue.defaultValue;
-        }
-        if (resolvedValue) {
-          resolvedValue = mapValueRules(schemaValue, resolvedValue);
-          result[ruleKey] = resolvedValue;
-        }
+      if (!resolvedValue) {
+        resolvedValue = properties.defaultValue;
       }
+      if (resolvedValue) {
+        resolvedValue = mapValueRules(schemaValue, resolvedValue);
+        return resolvedValue;
+      }
+    }
+  }
+};
+
+const getSetItem = (input, schemaValue) => {
+  const result = {};
+  for (const key in schemaValue.properties) {
+    const properties = schemaValue.properties[key];
+    const resolvedValue = getResolvedValue(input, properties, schemaValue);
+    if (resolvedValue) {
+      result[key] = resolvedValue;
     }
   }
   return result;
