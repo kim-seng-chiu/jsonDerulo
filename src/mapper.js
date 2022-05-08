@@ -51,10 +51,10 @@ const getResolvedValue = (input, properties, schemaValue) => {
     if (typeof resolvedValue === "object" && properties.properties) {
       return getSetItem(resolvedValue, properties);
     } else {
-      if (!resolvedValue) {
+      if (typeof resolvedValue === "undefined") {
         resolvedValue = properties.defaultValue;
       }
-      if (resolvedValue) {
+      if (typeof resolvedValue !== "undefined") {
         resolvedValue = mapValueRules(schemaValue, resolvedValue);
         return resolvedValue;
       }
@@ -67,7 +67,7 @@ const getSetItem = (input, schemaValue) => {
   for (const key in schemaValue.properties) {
     const properties = schemaValue.properties[key];
     const resolvedValue = getResolvedValue(input, properties, schemaValue);
-    if (resolvedValue) {
+    if (typeof resolvedValue !== "undefined") {
       result[key] = resolvedValue;
     }
   }
