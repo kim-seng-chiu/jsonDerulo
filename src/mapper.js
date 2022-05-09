@@ -2,10 +2,10 @@
 
 const get = require("lodash.get");
 
-const mapValueRules = (schemaValue, originalValue) => {
+const mapValueRules = (mappingValueRules, originalValue) => {
   let newValue = originalValue;
-  if (schemaValue.mappingValueRules) {
-    const validMapRule = schemaValue.mappingValueRules.find((rule) =>
+  if (mappingValueRules) {
+    const validMapRule = mappingValueRules.find((rule) =>
       rule.original.includes(originalValue)
     );
     if (validMapRule) {
@@ -14,7 +14,7 @@ const mapValueRules = (schemaValue, originalValue) => {
   }
   return newValue;
 };
-const getMapItem = (input, mapItems) => {
+const getMapItems = (input, mapItems) => {
   let value;
   if (Array.isArray(mapItems)) {
     for (const item of mapItems) {
@@ -63,6 +63,7 @@ const mapper = (input, schema) => {
     const dataType = value.type;
     let mapItems;
     let resolvedValue;
+    let hasMapItems = false;
 
     if (value.staticValue) {
       mappedObject[key] = value.staticValue;
@@ -70,31 +71,26 @@ const mapper = (input, schema) => {
     }
 
     if (value.mapItems) {
-      mapItems = getMapItem(input, value.mapItems);
+      mapItems = getMapItems(input, value.mapItems);
+      hasMapItems = typeof mapItems !== "undefined";
     }
 
-    if (dataType === "set" && mapItems) {
+    if (dataType === "set" && hasMapItems) {
       resolvedValue = getSet(mapItems, value.properties);
-    } else if (dataType === "tag" && mapItems) {
+    } else if (dataType === "tag" && hasMapItems) {
       resolvedValue = getTag(mapItems);
     } else {
       if (value.properties) {
-        if (typeof mapItems === "undefined") {
-          resolvedValue = mapper(input, value.properties);
-        } else {
-          resolvedValue = mapper(mapItems, value.properties);
-        }
+        resolvedValue = hasMapItems
+          ? mapper(mapItems, value.properties)
+          : mapper(input, value.properties);
       } else {
-        if (typeof mapItems === "undefined") {
-          if (typeof value.defaultValue !== "undefined") {
-            resolvedValue = value.defaultValue;
-          }
-        } else {
-          mapItems = mapValueRules(value, mapItems);
-          resolvedValue = mapItems;
-        }
+        resolvedValue = hasMapItems
+          ? mapValueRules(value.mappingValueRules, mapItems)
+          : value.defaultValue;
       }
     }
+
     if (typeof resolvedValue !== "undefined") {
       mappedObject[key] = resolvedValue;
     }
