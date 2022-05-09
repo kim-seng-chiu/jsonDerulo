@@ -28,31 +28,6 @@ const getMapItem = (input, mapItems) => {
   return value;
 };
 
-const getResolvedValue = (input, properties, schemaValue) => {
-  if (properties.staticValue) {
-    return properties.staticValue;
-  } else if (properties.type === "set") {
-    return getSet(input, properties);
-  } else if (properties.type === "tag") {
-    return getTag(input, properties);
-  } else if (properties.type === "aobject") {
-    return mapper(resolvedValue, properties);
-  } else {
-    let resolvedValue = getMapItem(input, properties.mapItems);
-    if (typeof resolvedValue === "object" && properties.properties) {
-      return getSetItem(resolvedValue, properties);
-    } else {
-      if (typeof resolvedValue === "undefined") {
-        resolvedValue = properties.defaultValue;
-      }
-      if (typeof resolvedValue !== "undefined") {
-        resolvedValue = mapValueRules(schemaValue, resolvedValue);
-        return resolvedValue;
-      }
-    }
-  }
-};
-
 const getTag = (input, schemaValue) => {
   const result = [];
   let resolvedValue = getMapItem(input, schemaValue.mapItems);
@@ -65,43 +40,12 @@ const getTag = (input, schemaValue) => {
   }
 };
 
-// const mapper2 = (input, schema) => {
-//   const mappedObject = {};
-//   Object.keys(schema).forEach((schemaKey) => {
-//     const schemaValue = schema[schemaKey];
-//     const dataType = schemaValue.type;
-//     const mapItems = schemaValue.mapItems;
-//     const defaultValue = schemaValue.defaultValue ?? null;
-
-//     switch (dataType) {
-//       case "string":
-//       case "number":
-//       case "boolean":
-//       case "array":
-//         resolvedValue = getResolvedValue(input, schemaValue, schemaValue);
-
-//         if (resolvedValue) {
-//           mappedObject[schemaKey] = resolvedValue;
-//         }
-//         return;
-//       case "object":
-//         mappedObject[schemaKey] = mapper(input, schemaValue.properties);
-//         return;
-//       case "set":
-//         mappedObject[schemaKey] = getSet(input, schemaValue);
-//         return;
-//     }
-//   });
-const getSetItem = (input, value) => {
-  const result = {};
-  for (const key in value.properties) {
-    const properties = value.properties[key];
-    const resolvedValue = getResolvedValue(input, properties, value);
-    if (typeof resolvedValue !== "undefined") {
-      result[key] = resolvedValue;
-    }
+const isEmpty = (obj) => {
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop)) return false;
   }
-  return result;
+
+  return true;
 };
 
 const getSet = (input, value) => {
@@ -110,7 +54,7 @@ const getSet = (input, value) => {
     if (Array.isArray(inputs)) {
       let resolvedValues = [];
       inputs.forEach((input) => {
-        resolvedValues.push(getSetItem(input, value));
+        resolvedValues.push(mapper(input, value.properties));
       });
       return resolvedValues;
     }
@@ -123,7 +67,8 @@ const mapper = (input, schema) => {
     const value = schema[key];
     const dataType = value.type;
     let mapItems;
-    const defaultValue = value.defaultValue ?? null;
+    let resolvedValue;
+
     if (value.staticValue) {
       mappedObject[key] = value.staticValue;
       continue;
@@ -132,15 +77,25 @@ const mapper = (input, schema) => {
       mapItems = getMapItem(input, value.mapItems);
     }
     if (dataType === "set" && mapItems) {
-      mappedObject[key] = getSet(input, value);
-      break;
+      resolvedValue = getSet(input, value);
+      if (typeof resolvedValue !== "undefined") {
+        mappedObject[key] = resolvedValue;
+      }
+      continue;
+    }
+    if (dataType === "tag" && mapItems) {
+      resolvedValue = getTag(input, value);
+      if (typeof resolvedValue !== "undefined") {
+        mappedObject[key] = resolvedValue;
+      }
+      continue;
     }
 
     if (value.properties) {
       if (typeof mapItems === "undefined") {
-        mappedObject[key] = mapper(input, value.properties);
+        resolvedValue = mapper(input, value.properties);
       } else {
-        mappedObject[key] = mapper(mapItems, value.properties);
+        resolvedValue = mapper(mapItems, value.properties);
       }
       // switch (dataType) {
       //   case "object":
@@ -153,15 +108,22 @@ const mapper = (input, schema) => {
       // }
     } else {
       if (typeof mapItems === "undefined") {
-        mappedObject[key] = defaultValue;
+        if (typeof value.defaultValue !== "undefined") {
+          resolvedValue = value.defaultValue;
+        }
       } else {
         mapItems = mapValueRules(value, mapItems);
-        mappedObject[key] = mapItems;
+        resolvedValue = mapItems;
       }
+    }
+    if (typeof resolvedValue !== "undefined") {
+      mappedObject[key] = resolvedValue;
     }
   }
 
-  return mappedObject;
+  if (!isEmpty(mappedObject)) {
+    return mappedObject;
+  }
 };
 
 module.exports = mapper;
