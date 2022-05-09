@@ -60,9 +60,7 @@ describe("mapper", () => {
       };
 
       const result = mapper(input, template);
-      const expected = {
-        provider: "aws",
-      };
+      const expected = { configuration: null, provider: "aws" };
       expect(result).toStrictEqual(expected);
     });
   });
