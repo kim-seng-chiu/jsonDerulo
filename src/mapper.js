@@ -46,6 +46,8 @@ const getResolvedValue = (input, properties, schemaValue) => {
     return properties.staticValue;
   } else if (properties.type === "set") {
     return getSet(input, properties);
+  } else if (properties.type === "tag") {
+    return getTag(input, properties);
   } else {
     let resolvedValue = getMapItem(input, properties.mapItems);
     if (typeof resolvedValue === "object" && properties.properties) {
@@ -72,6 +74,18 @@ const getSetItem = (input, schemaValue) => {
     }
   }
   return result;
+};
+
+const getTag = (input, schemaValue) => {
+  const result = [];
+  let resolvedValue = getMapItem(input, schemaValue.mapItems);
+  for (const Key in resolvedValue) {
+    const Value = resolvedValue[Key];
+    result.push({ Key, Value });
+  }
+  if (result.length) {
+    return result;
+  }
 };
 
 const mapper = (input, schema) => {
