@@ -75,20 +75,20 @@ const mapper = (input, schema) => {
       hasMapItems = typeof mapItems !== "undefined";
     }
 
-    if (dataType === "set" && hasMapItems) {
-      resolvedValue = getSet(mapItems, value.properties);
-    } else if (dataType === "tag" && hasMapItems) {
-      resolvedValue = getTag(mapItems);
-    } else {
-      if (value.properties) {
-        resolvedValue = hasMapItems
-          ? mapper(mapItems, value.properties)
-          : mapper(input, value.properties);
+    if (hasMapItems) {
+      if (dataType === "set") {
+        resolvedValue = getSet(mapItems, value.properties);
+      } else if (dataType === "tag") {
+        resolvedValue = getTag(mapItems);
       } else {
-        resolvedValue = hasMapItems
-          ? mapValueRules(value.mappingValueRules, mapItems)
-          : value.defaultValue;
+        resolvedValue = value.properties
+          ? mapper(mapItems, value.properties)
+          : mapValueRules(value.mappingValueRules, mapItems);
       }
+    } else {
+      resolvedValue = value.properties
+        ? mapper(input, value.properties)
+        : value.defaultValue;
     }
 
     if (typeof resolvedValue !== "undefined") {
