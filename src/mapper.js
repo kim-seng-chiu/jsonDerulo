@@ -28,11 +28,10 @@ const getMapItem = (input, mapItems) => {
   return value;
 };
 
-const getTag = (input, schemaValue) => {
+const getTag = (mapItems) => {
   const result = [];
-  let resolvedValue = getMapItem(input, schemaValue.mapItems);
-  for (const Key in resolvedValue) {
-    const Value = resolvedValue[Key];
+  for (const Key in mapItems) {
+    const Value = mapItems[Key];
     result.push({ Key, Value });
   }
   if (result.length) {
@@ -44,20 +43,16 @@ const isEmpty = (obj) => {
   for (const prop in obj) {
     if (obj.hasOwnProperty(prop)) return false;
   }
-
   return true;
 };
 
-const getSet = (input, value) => {
-  if (value.mapItems) {
-    let inputs = getMapItem(input, value.mapItems);
-    if (Array.isArray(inputs)) {
-      let resolvedValues = [];
-      inputs.forEach((input) => {
-        resolvedValues.push(mapper(input, value.properties));
-      });
-      return resolvedValues;
-    }
+const getSet = (mapItems, properties) => {
+  if (Array.isArray(mapItems)) {
+    let resolvedValues = [];
+    mapItems.forEach((input) => {
+      resolvedValues.push(mapper(input, properties));
+    });
+    return resolvedValues;
   }
 };
 
@@ -73,47 +68,31 @@ const mapper = (input, schema) => {
       mappedObject[key] = value.staticValue;
       continue;
     }
+
     if (value.mapItems) {
       mapItems = getMapItem(input, value.mapItems);
     }
+
     if (dataType === "set" && mapItems) {
-      resolvedValue = getSet(input, value);
-      if (typeof resolvedValue !== "undefined") {
-        mappedObject[key] = resolvedValue;
-      }
-      continue;
-    }
-    if (dataType === "tag" && mapItems) {
-      resolvedValue = getTag(input, value);
-      if (typeof resolvedValue !== "undefined") {
-        mappedObject[key] = resolvedValue;
-      }
-      continue;
-    }
-
-    if (value.properties) {
-      if (typeof mapItems === "undefined") {
-        resolvedValue = mapper(input, value.properties);
-      } else {
-        resolvedValue = mapper(mapItems, value.properties);
-      }
-      // switch (dataType) {
-      //   case "object":
-      //     mappedObject[key] = mapper(input, value.properties);
-      //     break;
-      //   // case "set":
-      //   //   mappedObject[key] = getSet(input, value);
-      //   //   break;
-
-      // }
+      resolvedValue = getSet(mapItems, value.properties);
+    } else if (dataType === "tag" && mapItems) {
+      resolvedValue = getTag(mapItems);
     } else {
-      if (typeof mapItems === "undefined") {
-        if (typeof value.defaultValue !== "undefined") {
-          resolvedValue = value.defaultValue;
+      if (value.properties) {
+        if (typeof mapItems === "undefined") {
+          resolvedValue = mapper(input, value.properties);
+        } else {
+          resolvedValue = mapper(mapItems, value.properties);
         }
       } else {
-        mapItems = mapValueRules(value, mapItems);
-        resolvedValue = mapItems;
+        if (typeof mapItems === "undefined") {
+          if (typeof value.defaultValue !== "undefined") {
+            resolvedValue = value.defaultValue;
+          }
+        } else {
+          mapItems = mapValueRules(value, mapItems);
+          resolvedValue = mapItems;
+        }
       }
     }
     if (typeof resolvedValue !== "undefined") {
