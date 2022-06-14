@@ -338,4 +338,62 @@ describe("mapper", () => {
       });
     });
   });
+  describe("GIVEN set(strings) has been configured", () => {
+    const schemaSetStrings = {
+      configuration: {
+        type: "object",
+        properties: {
+          Name: {
+            type: "string",
+            mapItems: ["configuration.name"],
+          },
+          Subnets: {
+            type: "set(strings)",
+            mapItems: ["configuration.subnets"],
+            properties: {
+              mapItems: ["reference", ""],
+            },
+          },
+        },
+      },
+    };
+    describe("WHEN an array of objects is provided as input", () => {
+      const testData1 = {
+        configuration: {
+          name: "Test1",
+          subnets: [
+            {
+              reference: "aws_subnet.example1",
+              aws_subnet: [],
+            },
+            {
+              reference: "aws_subnet.example2",
+              aws_subnet: [],
+            },
+          ],
+        },
+      };
+      it("SHOULD map a single value from each object", () => {
+        expect(mapper(testData1, schemaSetStrings)).toMatchObject({
+          configuration: {
+            Name: "Test1",
+            Subnets: ["aws_subnet.example1", "aws_subnet.example2"],
+          },
+        });
+      });
+    });
+    describe("WHEN an array of strings is provided as input", () => {
+      const testData2 = {
+        configuration: {
+          name: "Test2",
+          subnets: ["198.0.1.15/1", "20.0.1.23/1"],
+        },
+      };
+      it("SHOULD return the array of strings", () => {
+        expect(mapper(testData2, schemaSetStrings)).toMatchObject({                                                                                                                                 
+          configuration: { Name: 'Test2', Subnets: [ '198.0.1.15/1', '20.0.1.23/1' ] }
+        });
+      })
+    })
+  });
 });
