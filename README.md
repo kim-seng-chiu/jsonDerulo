@@ -48,7 +48,25 @@ The main function `mapper` takes two arguments, currently.
 
 | attribute | data type | required | values |
 | --------- | --------- | -------- | ------ |
-| type | string | yes | "string", "number", "boolean", "datetime", "object", "array" |
+| type | string | yes | "string", "number", "boolean", "datetime", "object", "array", "set", "tags", "set(strings)" |
 | mapItems | array(strings) | no | - |
 | description | string | no | - |
 | properties | object | yes for data type object | - |
+
+### Data types for `mapper`
+(documentation WIP)
+| data type | description of usage |
+| --------- | -------------------- |
+| string | |
+| number | |
+| boolean | |
+| datetime | |
+| object | |
+| array | |
+| set | |
+| tags | |
+| set(strings) | |
+
+### Roadmap for `mapper`
+* Refactor for consistent variable names
+* `getPrimitivesSet` to be used for set(strings | numbers)

@@ -1,6 +1,7 @@
 /** @format */
 
 const get = require("lodash.get");
+const isPrimitive = require("is-primitive");
 
 const mapValueRules = (mappingValueRules, originalValue) => {
   let newValue = originalValue;
@@ -56,6 +57,31 @@ const getSet = (mapItems, properties) => {
   }
 };
 
+const getPrimitivesSet = (sourceValues, paths) => {
+  if(Array.isArray(paths)) {
+    let resolvedValues = [];
+    if(Array.isArray(sourceValues)) {
+      sourceValues.forEach(sourceValue => {
+        for (const item in paths) {
+          if(paths[item]) {
+            if(get(sourceValue, paths[item])) {
+              resolvedValues.push(get(sourceValue, paths[item]));
+              break;
+            }
+          } else {
+            if(!isPrimitive(sourceValue)) {
+              // assume if source is array or object, it requires remapping
+              // please raise a bug if this is not the case
+              resolvedValues.push(sourceValue)
+            }
+          }
+        }
+      });
+      return resolvedValues;
+    }
+  }
+}
+
 const mapper = (input, schema) => {
   const mappedObject = {};
   for (const key in schema) {
@@ -80,6 +106,8 @@ const mapper = (input, schema) => {
         resolvedValue = getSet(mapItems, value.properties);
       } else if (dataType === "tag") {
         resolvedValue = getTag(mapItems);
+      } else if (dataType === "set(strings)") {
+        resolvedValue = getPrimitivesSet(mapItems, value.properties.mapItems);
       } else {
         resolvedValue = value.properties
           ? mapper(mapItems, value.properties)
