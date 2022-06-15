@@ -1,6 +1,7 @@
 /** @format */
 
 const get = require("lodash.get");
+const isPrimitive = require("is-primitive");
 
 const mapValueRules = (mappingValueRules, originalValue) => {
   let newValue = originalValue;
@@ -68,7 +69,7 @@ const getPrimitivesSet = (sourceValues, paths) => {
               break;
             }
           } else {
-            if(typeof sourceValue !== "object") {
+            if(!isPrimitive(sourceValue)) {
               // assume if source is array or object, it requires remapping
               // please raise a bug if this is not the case
               resolvedValues.push(sourceValue)
