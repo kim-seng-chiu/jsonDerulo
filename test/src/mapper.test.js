@@ -38,7 +38,6 @@ describe("mapper", () => {
       });
     });
   });
-
   describe("GIVEN key is mapped to a static value", () => {
     it("SHOULD add the key to the output, even if it is not in the input", () => {
       const template = {
@@ -57,7 +56,6 @@ describe("mapper", () => {
       expect(result).toStrictEqual(expected);
     });
   });
-
   describe("GIVEN mappingValueRules is configured", () => {
     it("SHOULD replace mappingValueRules.original with .target in the input", () => {
       const template = {
@@ -390,10 +388,349 @@ describe("mapper", () => {
         },
       };
       it("SHOULD return the array of strings", () => {
-        expect(mapper(testData2, schemaSetStrings)).toMatchObject({                                                                                                                                 
-          configuration: { Name: 'Test2', Subnets: [ '198.0.1.15/1', '20.0.1.23/1' ] }
+        expect(mapper(testData2, schemaSetStrings)).toMatchObject({
+          configuration: {
+            Name: "Test2",
+            Subnets: ["198.0.1.15/1", "20.0.1.23/1"],
+          },
         });
-      })
-    })
+      });
+    });
+  });
+  describe("GIVEN a key-value pair needs to be destructured", () => {
+    const schema = {
+      LoadBalancerAttributes: {
+        type: "object",
+        properties: {
+          DeletionProtectionEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "deletion_protection.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false,
+              },
+            ],
+          },
+          S3AccessLogsEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "access_logs.s3.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false,
+              },
+            ],
+          },
+          S3AccessLogsBucket: {
+            type: "string",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "access_logs.s3.bucket",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+          },
+          S3AccessLogsPrefix: {
+            type: "string",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "access_logs.s3.prefix",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+          },
+          Ipv6DenyAllIgwTraffic: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "ipv6.deny_all_igw_traffic",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          IdleTimeoutSeconds: {
+            type: "number",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "idle_timeout.timeout_seconds",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+          },
+          RoutingHttpDesyncMitigationMode: {
+            type: "string",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http.desync_mitigation_mode",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+          },
+          RoutingHttpDropInvalidHeaderFieldsEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http.drop_invalid_header_fields.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          RoutingHttpXAmznTlsVersionAndCipherSuiteEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http.x_amzn_tls_version_and_cipher_suite.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          RoutingHttpXffClientPortEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http.xff_client_port.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          RoutingHttpXffHeaderProcessingMode: {
+            type: "string",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http.xff_header_processing.mode",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          RoutingHttp2Enabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "routing.http2.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          WafFailOpenEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "waf.fail_open.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+          LoadBalancingCrossZoneEnabled: {
+            type: "boolean",
+            mapItems: ["Value"],
+            filter: {
+              filterType: "object",
+              Key: "Key",
+              Value: "load_balancing.cross_zone.enabled",
+              sourceAttribute: "configuration.LoadBalancerAttributes",
+            },
+            mappingValueRules: [
+              {
+                original: ["true", true],
+                target: true,
+              },
+              {
+                original: ["false", false],
+                target: false
+              }
+            ],
+          },
+        },
+      },
+    };
+    const original = {
+      configuration: {
+        LoadBalancerAttributes: [
+          {
+            Key: "deletion_protection.enabled",
+            Value: true,
+          },
+          {
+            Key: "access_logs.s3.enabled",
+            Value: "false",
+          },
+          {
+            Key: "access_logs.s3.bucket",
+            Value: "bucket-name-20220701",
+          },
+          {
+            Key: "access_logs.s3.prefix",
+            Value: "test-",
+          },
+          {
+            Key: "ipv6.deny_all_igw_traffic",
+            Value: true,
+          },
+          {
+            Key: "idle_timeout.timeout_seconds",
+            Value: 30,
+          },
+          {
+            Key: "routing.http.desync_mitigation_mode",
+            Value: "strictest",
+          },
+          {
+            Key: "routing.http.drop_invalid_header_fields.enabled",
+            Value: false,
+          },
+          {
+            Key: "routing.http.preserve_host_header.enabled",
+            Value: true,
+          },
+          {
+            Key: "routing.http.x_amzn_tls_version_and_cipher_suite.enabled",
+            Value: false,
+          },
+          {
+            Key: "routing.http.xff_client_port.enabled",
+            Value: "true",
+          },
+          {
+            Key: "routing.http.xff_header_processing.mode",
+            Value: "preserve",
+          },
+          {
+            Key: "routing.http2.enabled",
+            Value: false,
+          },
+          {
+            Key: "waf.fail_open.enabled",
+            Value: true,
+          },
+          {
+            Key: "load_balancing.cross_zone.enabled",
+            Value: false,
+          },
+        ],
+      },
+    };
+    const result = {
+      LoadBalancerAttributes: {
+        DeletionProtectionEnabled: true,
+        S3AccessLogsEnabled: false,
+        S3AccessLogsBucket: "bucket-name-20220701",
+        S3AccessLogsPrefix: "test-",
+        Ipv6DenyAllIgwTraffic: true,
+        IdleTimeoutSeconds: 30,
+        RoutingHttpDesyncMitigationMode: "strictest",
+        RoutingHttpDropInvalidHeaderFieldsEnabled: false,
+        RoutingHttpXAmznTlsVersionAndCipherSuiteEnabled: false,
+        RoutingHttpXffClientPortEnabled: true,
+        RoutingHttpXffHeaderProcessingMode: "preserve",
+        RoutingHttp2Enabled: false,
+        WafFailOpenEnabled: true,
+        LoadBalancingCrossZoneEnabled: false,
+      },
+    };
+    it("SHOULD return each value attached to its relevant attribute", () => {
+      expect(mapper(original, schema)).toMatchObject(result);
+    });
   });
 });
