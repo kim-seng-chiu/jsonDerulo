@@ -138,9 +138,6 @@ const mapper = (input, schema) => {
       filteredValue = filterSource(input, schema[key]);
       mapItems = getMapItems(filteredValue, value.mapItems);
       hasMapItems = typeof mapItems !== "undefined" || null;
-      // HOW DO I MAP YOU?
-      // check if the mapItem returns an array
-      // find where the filter is in the input based on the mapItem?
     }
 
     if (hasMapItems) {
