@@ -1,4 +1,4 @@
-# JSON Derulo (WIP)
+# JSON Derulo
 
 This is still a work in progress, I apologise if the documentation does not make much sense.
 
@@ -67,6 +67,9 @@ The main function `mapper` takes two arguments, currently.
 | tags | |
 | set(strings) | |
 
+### Filtering an array to extract particular values (WIP)
+
 ### Roadmap for `mapper`
 * Refactor for consistent variable names
 * `getPrimitivesSet` to be used for set(strings | numbers)
+* Filtering source data that is an array with multiple conditions
