@@ -118,44 +118,58 @@ const filterSource = (input, mapContext) => {
 const mapper = (input, schema) => {
   const mappedObject = {};
   for (const key in schema) {
-    const value = schema[key];
-    const dataType = value.type;
     let mapItems;
     let resolvedValue;
     let hasMapItems = false;
+    if (schema[key].oneOf) {
+      const mainKey = key;
+      const results = schema[key].oneOf.map((item) => {
+        let modularSchema = { [mainKey]: item };
+        const mappedValue = mapper(input, modularSchema);
+        return mappedValue;
+      });
+      /**
+       * oneOf means that only one of the attributes 
+       * should be defined from the data source
+       */
+      resolvedValue = results.filter((item) => item)[0][mainKey];
+    } else {
+      const value = schema[key];
+      const dataType = value.type;
 
-    if (value.staticValue) {
-      mappedObject[key] = value.staticValue;
-      continue;
-    }
+      if (value.staticValue) {
+        mappedObject[key] = value.staticValue;
+        continue;
+      }
 
-    if (value.mapItems) {
-      mapItems = getMapItems(input, value.mapItems);
-      hasMapItems = typeof mapItems !== "undefined";
-    }
+      if (value.mapItems) {
+        mapItems = getMapItems(input, value.mapItems);
+        hasMapItems = typeof mapItems !== "undefined";
+      }
 
-    if (value.filter) {
-      filteredValue = filterSource(input, schema[key]);
-      mapItems = getMapItems(filteredValue, value.mapItems);
-      hasMapItems = typeof mapItems !== "undefined" || null;
-    }
+      if (value.filter) {
+        filteredValue = filterSource(input, schema[key]);
+        mapItems = getMapItems(filteredValue, value.mapItems);
+        hasMapItems = typeof mapItems !== "undefined" || null;
+      }
 
-    if (hasMapItems) {
-      if (dataType === "set") {
-        resolvedValue = getSet(mapItems, value.properties);
-      } else if (dataType === "tag") {
-        resolvedValue = getTag(mapItems);
-      } else if (dataType === "set(strings)") {
-        resolvedValue = getPrimitivesSet(mapItems, value.properties.mapItems);
+      if (hasMapItems) {
+        if (dataType === "set") {
+          resolvedValue = getSet(mapItems, value.properties);
+        } else if (dataType === "tag") {
+          resolvedValue = getTag(mapItems);
+        } else if (dataType === "set(strings)") {
+          resolvedValue = getPrimitivesSet(mapItems, value.properties.mapItems);
+        } else {
+          resolvedValue = value.properties
+            ? mapper(mapItems, value.properties)
+            : mapValueRules(value.mappingValueRules, mapItems);
+        }
       } else {
         resolvedValue = value.properties
-          ? mapper(mapItems, value.properties)
-          : mapValueRules(value.mappingValueRules, mapItems);
+          ? mapper(input, value.properties)
+          : value.defaultValue;
       }
-    } else {
-      resolvedValue = value.properties
-        ? mapper(input, value.properties)
-        : value.defaultValue;
     }
 
     if (typeof resolvedValue !== "undefined") {
