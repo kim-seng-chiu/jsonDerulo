@@ -978,5 +978,142 @@ describe("mapper", () => {
       };
       expect(result).toStrictEqual(expected);
     });
+    describe("WHEN both map options are defined", () => {
+      it("SHOULD map the attribute for the first option", () => {
+        const schema = {
+          CannedProfile: {
+            description: "A list of access control grants for the user",
+            oneOf: [
+              {
+                type: "array",
+                mapItems: ["profile"],
+                mappingValueRules: [
+                  {
+                    original: ["admin"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "Owner",
+                        },
+                        Permissions: "FullControls",
+                      },
+                      {
+                        Grantee: {
+                          ID: "abxd",
+                          Name: "Owner",
+                        },
+                        Permissions: "Delete",
+                      },
+                    ],
+                  },
+                  {
+                    original: ["hr"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "Manager",
+                        },
+                        Permissions: "FullRead",
+                      },
+                    ],
+                  },
+                  {
+                    original: ["research"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "User",
+                        },
+                        Permissions: "Read",
+                      },
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "User",
+                        },
+                        Permissions: "Write",
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "set",
+                mapItems: ["full_profile.role"],
+                properties: {
+                  Grantee: {
+                    type: "object",
+                    properties: {
+                      ID: {
+                        type: "string",
+                        mapItems: ["Grantee.ID"],
+                      },
+                      Name: {
+                        type: "string",
+                        mapItems: ["Grantee.Name"],
+                      },
+                    },
+                  },
+                  Permissions: {
+                    type: "string",
+                    mapItems: ["Permissions"],
+                  },
+                },
+              },
+            ],
+          },
+          Name: {
+            type: "string",
+            mapItems: ["first_name","name"],
+          },
+        };
+        const data = {
+          profile: "admin",
+          full_profile: {
+            role: [
+              {
+                Grantee: {
+                  ID: "a",
+                  Name: "a"
+                },
+                Permissions: "a"
+              },
+              {
+                Grantee: {
+                  ID: "b",
+                  Name: "b"
+                },
+                Permissions: "b"
+              }
+            ]
+          },
+          first_name: "Gloria",
+        };
+        const result = mapper(data, schema);
+        const expected = {
+          CannedProfile: [
+            {
+              Grantee: {
+                ID: "axcd",
+                Name: "Owner",
+              },
+              Permissions: "FullControls",
+            },
+            {
+              Grantee: {
+                ID: "abxd",
+                Name: "Owner",
+              },
+              Permissions: "Delete",
+            },
+          ],
+          Name: "Gloria",
+        };
+        expect(result).toStrictEqual(expected);
+      });
+    })
   });
 });

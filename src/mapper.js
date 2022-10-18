@@ -65,13 +65,13 @@ const getPrimitivesSet = (sourceValues, paths) => {
         for (const item in paths) {
           if (paths[item]) {
             if (get(sourceValue, paths[item])) {
+              // assume if source is array or object, it requires remapping
+              // please raise a bug if this is not the case
               resolvedValues.push(get(sourceValue, paths[item]));
               break;
             }
           } else {
-            if (!isPrimitive(sourceValue)) {
-              // assume if source is array or object, it requires remapping
-              // please raise a bug if this is not the case
+            if (isPrimitive(sourceValue)) {
               resolvedValues.push(sourceValue);
             }
           }
@@ -129,7 +129,7 @@ const mapper = (input, schema) => {
         return mappedValue;
       });
       /**
-       * oneOf means that only one of the attributes 
+       * oneOf means that only one of the attributes
        * should be defined from the data source
        */
       resolvedValue = results.filter((item) => item)[0][mainKey];
