@@ -78,6 +78,10 @@ const getPrimitivesSet = (sourceValues, paths) => {
         }
       });
       return resolvedValues;
+    } else {
+      // standalone primitive value to be mapped into an array
+      resolvedValues.push(sourceValues);
+      return resolvedValues;
     }
   }
 };
