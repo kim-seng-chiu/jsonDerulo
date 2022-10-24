@@ -478,8 +478,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           IdleTimeoutSeconds: {
@@ -518,8 +518,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           RoutingHttpXAmznTlsVersionAndCipherSuiteEnabled: {
@@ -538,8 +538,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           RoutingHttpXffClientPortEnabled: {
@@ -558,8 +558,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           RoutingHttpXffHeaderProcessingMode: {
@@ -578,8 +578,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           RoutingHttp2Enabled: {
@@ -598,8 +598,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           WafFailOpenEnabled: {
@@ -618,8 +618,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
           LoadBalancingCrossZoneEnabled: {
@@ -638,8 +638,8 @@ describe("mapper", () => {
               },
               {
                 original: ["false", false],
-                target: false
-              }
+                target: false,
+              },
             ],
           },
         },
@@ -732,5 +732,388 @@ describe("mapper", () => {
     it("SHOULD return each value attached to its relevant attribute", () => {
       expect(mapper(original, schema)).toMatchObject(result);
     });
+  });
+  describe("GIVEN an attribute that can be mapped from two different sources", () => {
+    it("SHOULD map the attribute for the first option", () => {
+      const schema = {
+        CannedProfile: {
+          description: "A list of access control grants for the user",
+          oneOf: [
+            {
+              type: "array",
+              mapItems: ["profile"],
+              mappingValueRules: [
+                {
+                  original: ["admin"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "Owner",
+                      },
+                      Permissions: "FullControls",
+                    },
+                    {
+                      Grantee: {
+                        ID: "abxd",
+                        Name: "Owner",
+                      },
+                      Permissions: "Delete",
+                    },
+                  ],
+                },
+                {
+                  original: ["hr"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "Manager",
+                      },
+                      Permissions: "FullRead",
+                    },
+                  ],
+                },
+                {
+                  original: ["research"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "User",
+                      },
+                      Permissions: "Read",
+                    },
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "User",
+                      },
+                      Permissions: "Write",
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "set",
+              mapItems: ["full_profile.role"],
+              properties: {
+                Grantee: {
+                  type: "object",
+                  properties: {
+                    ID: {
+                      type: "string",
+                      mapItems: ["Grantee.ID"],
+                    },
+                    Name: {
+                      type: "string",
+                      mapItems: ["Grantee.Name"],
+                    },
+                  },
+                },
+                Permissions: {
+                  type: "string",
+                  mapItems: ["Permissions"],
+                },
+              },
+            },
+          ],
+        },
+        Name: {
+          type: "string",
+          mapItems: ["name"],
+        },
+      };
+      const data = {
+        profile: "hr",
+        name: "Phil",
+      };
+      const result = mapper(data, schema);
+      const expected = {
+        CannedProfile: [
+          {
+            Grantee: {
+              ID: "axcd",
+              Name: "Manager",
+            },
+            Permissions: "FullRead",
+          },
+        ],
+        Name: "Phil",
+      };
+      expect(result).toStrictEqual(expected);
+    });
+    it("SHOULD map the attribute for the second option", () => {
+      const schema = {
+        CannedProfile: {
+          description: "A list of access control grants for the user",
+          oneOf: [
+            {
+              type: "array",
+              mapItems: ["profile"],
+              mappingValueRules: [
+                {
+                  original: ["admin"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "Owner",
+                      },
+                      Permissions: "FullControls",
+                    },
+                    {
+                      Grantee: {
+                        ID: "abxd",
+                        Name: "Owner",
+                      },
+                      Permissions: "Delete",
+                    },
+                  ],
+                },
+                {
+                  original: ["hr"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "Manager",
+                      },
+                      Permissions: "FullRead",
+                    },
+                  ],
+                },
+                {
+                  original: ["research"],
+                  target: [
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "User",
+                      },
+                      Permissions: "Read",
+                    },
+                    {
+                      Grantee: {
+                        ID: "axcd",
+                        Name: "User",
+                      },
+                      Permissions: "Write",
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "set",
+              mapItems: ["full_profile.role"],
+              properties: {
+                Grantee: {
+                  type: "object",
+                  properties: {
+                    ID: {
+                      type: "string",
+                      mapItems: ["Grantee.ID"],
+                    },
+                    Name: {
+                      type: "string",
+                      mapItems: ["Grantee.Name"],
+                    },
+                  },
+                },
+                Permissions: {
+                  type: "string",
+                  mapItems: ["Permissions"],
+                },
+              },
+            },
+          ],
+        },
+        Name: {
+          type: "string",
+          mapItems: ["first_name","name"],
+        },
+      };
+      const data = {
+        full_profile: {
+          role: [
+            {
+              Grantee: {
+                ID: "a",
+                Name: "a"
+              },
+              Permissions: "a"
+            },
+            {
+              Grantee: {
+                ID: "b",
+                Name: "b"
+              },
+              Permissions: "b"
+            }
+          ]
+        },
+        first_name: "Gloria",
+      };
+      const result = mapper(data, schema);
+      const expected = {
+        CannedProfile: [
+          {
+            Grantee: {
+              ID: "a",
+              Name: "a",
+            },
+            Permissions: "a",
+          },
+          {
+            Grantee: {
+              ID: "b",
+              Name: "b",
+            },
+            Permissions: "b",
+          }
+        ],
+        Name: "Gloria",
+      };
+      expect(result).toStrictEqual(expected);
+    });
+    describe("WHEN both map options are defined", () => {
+      it("SHOULD map the attribute for the first option", () => {
+        const schema = {
+          CannedProfile: {
+            description: "A list of access control grants for the user",
+            oneOf: [
+              {
+                type: "array",
+                mapItems: ["profile"],
+                mappingValueRules: [
+                  {
+                    original: ["admin"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "Owner",
+                        },
+                        Permissions: "FullControls",
+                      },
+                      {
+                        Grantee: {
+                          ID: "abxd",
+                          Name: "Owner",
+                        },
+                        Permissions: "Delete",
+                      },
+                    ],
+                  },
+                  {
+                    original: ["hr"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "Manager",
+                        },
+                        Permissions: "FullRead",
+                      },
+                    ],
+                  },
+                  {
+                    original: ["research"],
+                    target: [
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "User",
+                        },
+                        Permissions: "Read",
+                      },
+                      {
+                        Grantee: {
+                          ID: "axcd",
+                          Name: "User",
+                        },
+                        Permissions: "Write",
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "set",
+                mapItems: ["full_profile.role"],
+                properties: {
+                  Grantee: {
+                    type: "object",
+                    properties: {
+                      ID: {
+                        type: "string",
+                        mapItems: ["Grantee.ID"],
+                      },
+                      Name: {
+                        type: "string",
+                        mapItems: ["Grantee.Name"],
+                      },
+                    },
+                  },
+                  Permissions: {
+                    type: "string",
+                    mapItems: ["Permissions"],
+                  },
+                },
+              },
+            ],
+          },
+          Name: {
+            type: "string",
+            mapItems: ["first_name","name"],
+          },
+        };
+        const data = {
+          profile: "admin",
+          full_profile: {
+            role: [
+              {
+                Grantee: {
+                  ID: "a",
+                  Name: "a"
+                },
+                Permissions: "a"
+              },
+              {
+                Grantee: {
+                  ID: "b",
+                  Name: "b"
+                },
+                Permissions: "b"
+              }
+            ]
+          },
+          first_name: "Gloria",
+        };
+        const result = mapper(data, schema);
+        const expected = {
+          CannedProfile: [
+            {
+              Grantee: {
+                ID: "axcd",
+                Name: "Owner",
+              },
+              Permissions: "FullControls",
+            },
+            {
+              Grantee: {
+                ID: "abxd",
+                Name: "Owner",
+              },
+              Permissions: "Delete",
+            },
+          ],
+          Name: "Gloria",
+        };
+        expect(result).toStrictEqual(expected);
+      });
+    })
   });
 });
