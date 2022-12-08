@@ -158,16 +158,45 @@ const mapper = (input, schema) => {
       }
 
       if (hasMapItems) {
-        if (dataType === "set") {
-          resolvedValue = getSet(mapItems, value.properties);
-        } else if (dataType === "tag") {
-          resolvedValue = getTag(mapItems);
-        } else if (dataType === "set(strings)") {
-          resolvedValue = getPrimitivesSet(mapItems, value.properties.mapItems);
-        } else {
-          resolvedValue = value.properties
-            ? mapper(mapItems, value.properties)
-            : mapValueRules(value.mappingValueRules, mapItems);
+        switch (dataType) {
+          case "set":
+            resolvedValue = getSet(mapItems, value.properties);
+            break;
+          case "tag":
+            resolvedValue = getTag(mapItems);
+            break;
+          case "set(strings)":
+            resolvedValue = getPrimitivesSet(
+              mapItems,
+              value.properties.mapItems
+            );
+            break;
+          case "set":
+            resolvedValue = getSet(mapItems, value.properties);
+            break;
+          case "boolean":
+            resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
+            if (resolvedValue === "true") {
+              resolvedValue = true;
+            }
+            if (resolvedValue === "false") {
+              resolvedValue = false;
+            }
+            break;
+          case "number":
+            resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
+            if (!isNaN(resolvedValue)) {
+              resolvedValue = +resolvedValue;
+            }
+
+            break;
+
+            number;
+          default:
+            resolvedValue = value.properties
+              ? mapper(mapItems, value.properties)
+              : mapValueRules(value.mappingValueRules, mapItems);
+            break;
         }
       } else {
         resolvedValue = value.properties

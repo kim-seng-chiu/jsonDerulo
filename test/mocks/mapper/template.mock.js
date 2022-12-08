@@ -41,7 +41,7 @@ const bookTemplate = {
     },
     
     "YearPublished": {
-        "type": "number",
+        "type": "string",
         "mapItems": ["published"],
         "description": "The year in which the book was first published"
     },
