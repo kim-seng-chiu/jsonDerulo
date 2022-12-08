@@ -2,6 +2,7 @@
 
 const get = require("lodash.get");
 const isPrimitive = require("is-primitive");
+const { typeCoercion } = require("./validators");
 
 const mapValueRules = (mappingValueRules, originalValue) => {
   let newValue = originalValue;
@@ -177,7 +178,11 @@ const mapper = (input, schema) => {
     }
 
     if (typeof resolvedValue !== "undefined") {
-      mappedObject[key] = resolvedValue;
+      if (schema[key].type) {
+        mappedObject[key] = typeCoercion(resolvedValue, schema[key].type);
+      } else {
+        mappedObject[key] = resolvedValue;
+      }
     }
   }
 

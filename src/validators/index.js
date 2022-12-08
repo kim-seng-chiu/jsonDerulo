@@ -1,5 +1,5 @@
-const typeValidation = require("./typeValidation");
+const typeCoercion = require("./typeCoercion");
 
 module.exports = {
-    typeValidation
+    typeCoercion
 }
