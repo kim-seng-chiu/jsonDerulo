@@ -9,7 +9,7 @@ describe("mapper", () => {
       expect(mapper(input1, bookTemplate)).toMatchObject({
         Title: "Catcher in the Rye",
         Author: { Name: "J.D. Salinger", Origin: "USA" },
-        YearPublished: "1951",
+        YearPublished: 1951,
         IsFiction: true,
         NumberOfPages: 234,
       });
@@ -18,7 +18,7 @@ describe("mapper", () => {
       expect(mapper(input2, bookTemplate)).toMatchObject({
         Title: "Nineteen Eighty-Four",
         Author: { Name: "George Orwell", Origin: "England" },
-        YearPublished: "1949",
+        YearPublished: 1949,
         IsFiction: true,
         NumberOfPages: 328,
       });
