@@ -932,7 +932,7 @@ describe("mapper", () => {
         },
         Name: {
           type: "string",
-          mapItems: ["first_name","name"],
+          mapItems: ["first_name", "name"],
         },
       };
       const data = {
@@ -941,18 +941,18 @@ describe("mapper", () => {
             {
               Grantee: {
                 ID: "a",
-                Name: "a"
+                Name: "a",
               },
-              Permissions: "a"
+              Permissions: "a",
             },
             {
               Grantee: {
                 ID: "b",
-                Name: "b"
+                Name: "b",
               },
-              Permissions: "b"
-            }
-          ]
+              Permissions: "b",
+            },
+          ],
         },
         first_name: "Gloria",
       };
@@ -972,7 +972,7 @@ describe("mapper", () => {
               Name: "b",
             },
             Permissions: "b",
-          }
+          },
         ],
         Name: "Gloria",
       };
@@ -1067,7 +1067,7 @@ describe("mapper", () => {
           },
           Name: {
             type: "string",
-            mapItems: ["first_name","name"],
+            mapItems: ["first_name", "name"],
           },
         };
         const data = {
@@ -1077,18 +1077,18 @@ describe("mapper", () => {
               {
                 Grantee: {
                   ID: "a",
-                  Name: "a"
+                  Name: "a",
                 },
-                Permissions: "a"
+                Permissions: "a",
               },
               {
                 Grantee: {
                   ID: "b",
-                  Name: "b"
+                  Name: "b",
                 },
-                Permissions: "b"
-              }
-            ]
+                Permissions: "b",
+              },
+            ],
           },
           first_name: "Gloria",
         };
@@ -1114,6 +1114,227 @@ describe("mapper", () => {
         };
         expect(result).toStrictEqual(expected);
       });
-    })
+    });
+  });
+
+  describe("GIVEN expected attribute type is a boolean", () => {
+    describe("WHEN input is string 'true' or 'false'", () => {
+      it("SHOULD convert the string to boolean", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  MakeMeABoolean: {
+                    type: "boolean",
+                    mapItems: ["configuration.make_me_a_boolean"],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { make_me_a_boolean: "true" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          MakeMeABoolean: true,
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+        const input2 = {
+          configuration: { make_me_a_boolean: "false" },
+        };
+        const result2 = mapper(input, template);
+        const expected2 = {
+          MakeMeABoolean: false,
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("WHEN input is not a string 'true' or 'false'", () => {
+      it("SHOULD not convert to boolean", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  DontMakeMeABoolean: {
+                    type: "boolean",
+                    mapItems: ["configuration.dont_make_me_a_boolean"]
+                    
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { dont_make_me_a_boolean: "1" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          DontMakeMeABoolean: "1",
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("WHEN mappingValueRules have been set", () => {
+      it("SHOULD honour mappingValueRules override ", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  DontMakeMeABoolean: {
+                    type: "boolean",
+                    mapItems: ["configuration.dont_make_me_a_boolean"],
+                    mappingValueRules: [
+                      {
+                        original: ["Enabled", "true", true],
+                        target: "Enabled",
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { dont_make_me_a_boolean: "true" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          DontMakeMeABoolean: "Enabled",
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+  });
+  describe("GIVEN expected attribute type is a number", () => {
+    describe("WHEN input is a number wrapped in a quotes", () => {
+      it("SHOULD convert the string to number", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  MakeMeANumber: {
+                    type: "number",
+                    mapItems: ["configuration.make_me_a_number"],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { make_me_a_number: "128" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          MakeMeANumber: 128,
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+    describe("WHEN input is not a number wrapped in a quotes", () => {
+      it("SHOULD convert the string to number", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  DontMakeMeANumber: {
+                    type: "number",
+                    mapItems: ["configuration.dont_make_me_a_number"],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { dont_make_me_a_number: "the128" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          DontMakeMeANumber: "the128",
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
+
+    describe("WHEN mappingValueRules have been set", () => {
+      it("SHOULD honour mappingValueRules override ", () => {
+        const template = {
+          configuration: {
+            type: "object",
+            properties: {
+              ObjectLockConfiguration: {
+                type: "object",
+                properties: {
+                  DontMakeMeANumber: {
+                    type: "number",
+                    mapItems: ["configuration.dont_make_me_a_number"],
+                    mappingValueRules: [
+                      {
+                        original: ["128", "256"],
+                        target: "Standard",
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        const input = {
+          configuration: { dont_make_me_a_number: "128" },
+        };
+
+        const result = mapper(input, template);
+        const expected = {
+          DontMakeMeANumber: "Standard",
+        };
+        expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
+          expected
+        );
+      });
+    });
   });
 });
