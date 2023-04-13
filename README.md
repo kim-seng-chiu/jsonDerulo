@@ -31,17 +31,20 @@ console.log(toDatabase);
 // [{"id":1,"name":"Bethany","age":23},{"id":2,"name":"Mike","age":35},{"id":3,"name":"Daniel","age":31}]
 ```
 
-## `mapper`
+## `Mapper`
 The idea is for this function to be used with a large dataset of objects that require to be mapped to a new schema.
 
-The main function `mapper` takes two arguments, currently.
+class `Mapper` takes an `options` argument for its constructor. The `options` support fields as below:
+
+* `plugins` is the plugins which will be registered for this `Mapper`. Also see [Plugin System](Plugin.md).
+
+class `Mapper` provides an instance method `map` with these arguments:
+
 * `input` is the "raw" or original data.
-* `schema` is the defined schema that the original data requires to be mapped to. This is defined [here](#schema-for-mapper).
-* `inputKeys` is to get the parent levels keys from the input data.
+* `schema` is the defined schema that the original data requires to be mapped to. This is defined [here](#schema-for-Mapper).
+Method `map` loops over the defined schema to find and match the corresponding values from the input.
 
-`mapper` loops over the defined schema to find and match the corresponding values from the input.
-
-### Schema for mapper
+### Schema for Mapper
 * The template should be a JSON object
 * Each `key` should have an object with the following attributes
 * Refer to [JSON data types](https://datatracker.ietf.org/doc/html/rfc7159#:~:text=JSON%20can%20represent%20four%20primitive%20types%20(strings%2C%20numbers%2C%20booleans%2C%0A%20%20%20and%20null)%20and%20two%20structured%20types%20(objects%20and%20arrays).)
@@ -53,7 +56,7 @@ The main function `mapper` takes two arguments, currently.
 | description | string | no | - |
 | properties | object | yes for data type object | - |
 
-### Data types for `mapper`
+### Data types for `Mapper`
 (documentation WIP)
 | data type | description of usage |
 | --------- | -------------------- |
@@ -69,7 +72,9 @@ The main function `mapper` takes two arguments, currently.
 
 ### Filtering an array to extract particular values (WIP)
 
-### Roadmap for `mapper`
+### New Feature ([Plugin System](Plugin.md))
+
+### Roadmap for `Mapper`
 * Refactor for consistent variable names
 * `getPrimitivesSet` to be used for set(strings | numbers)
 * Filtering source data that is an array with multiple conditions

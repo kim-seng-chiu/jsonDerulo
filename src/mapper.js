@@ -2,6 +2,7 @@
 
 const get = require("lodash.get");
 const isPrimitive = require("is-primitive");
+const { usePlugins, registerPlugins } = require("./plugin");
 
 const mapValueRules = (mappingValueRules, originalValue) => {
   let newValue = originalValue;
@@ -45,16 +46,6 @@ const isEmpty = (obj) => {
     if (obj.hasOwnProperty(prop)) return false;
   }
   return true;
-};
-
-const getSet = (mapItems, properties) => {
-  if (Array.isArray(mapItems)) {
-    let resolvedValues = [];
-    mapItems.forEach((input) => {
-      resolvedValues.push(mapper(input, properties));
-    });
-    return resolvedValues;
-  }
 };
 
 const getPrimitivesSet = (sourceValues, paths) => {
@@ -119,100 +110,116 @@ const filterSource = (input, mapContext) => {
   return null;
 };
 
-const mapper = (input, schema) => {
-  const mappedObject = {};
-  for (const key in schema) {
-    let mapItems;
-    let resolvedValue;
-    let hasMapItems = false;
-    if (schema[key].oneOf) {
-      const mainKey = key;
-      const results = schema[key].oneOf.map((item) => {
-        let modularSchema = { [mainKey]: item };
-        const mappedValue = mapper(input, modularSchema);
-        return mappedValue;
-      });
-      /**
-       * oneOf means that only one of the attributes
-       * should be defined from the data source
-       */
-      resolvedValue = results.filter((item) => item)[0][mainKey];
-    } else {
+function Mapper(options) {
+  this.opt = options ? options : {};
+  this.registeredPlugins = registerPlugins(this.opt.plugins);
+
+  this.map = (input, schema) => {
+    const mappedObject = {};
+    for (const key in schema) {
+      let mapItems;
+      let resolvedValue;
+      let hasMapItems = false;
+
       const value = schema[key];
       const dataType = value.type;
+      const plugins = usePlugins(this.registeredPlugins, value.plugins);
 
-      if (value.staticValue) {
-        mappedObject[key] = value.staticValue;
-        continue;
-      }
-
-      if (value.mapItems) {
-        mapItems = getMapItems(input, value.mapItems);
-        hasMapItems = typeof mapItems !== "undefined";
-      }
-
-      if (value.filter) {
-        filteredValue = filterSource(input, schema[key]);
-        mapItems = getMapItems(filteredValue, value.mapItems);
-        hasMapItems = typeof mapItems !== "undefined" || null;
-      }
-
-      if (hasMapItems) {
-        switch (dataType) {
-          case "set":
-            resolvedValue = getSet(mapItems, value.properties);
-            break;
-          case "tag":
-            resolvedValue = getTag(mapItems);
-            break;
-          case "set(strings)":
-            resolvedValue = getPrimitivesSet(
-              mapItems,
-              value.properties.mapItems
-            );
-            break;
-          case "set":
-            resolvedValue = getSet(mapItems, value.properties);
-            break;
-          case "boolean":
-            resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
-            if (resolvedValue === "true") {
-              resolvedValue = true;
-            }
-            if (resolvedValue === "false") {
-              resolvedValue = false;
-            }
-            break;
-          case "number":
-            resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
-            if (!isNaN(resolvedValue)) {
-              resolvedValue = +resolvedValue;
-            }
-
-            break;
-
-            number;
-          default:
-            resolvedValue = value.properties
-              ? mapper(mapItems, value.properties)
-              : mapValueRules(value.mappingValueRules, mapItems);
-            break;
-        }
+      if (value.oneOf) {
+        const mainKey = key;
+        const results = value.oneOf.map((item) => {
+          let modularSchema = { [mainKey]: item };
+          const mappedValue = this.map(input, modularSchema);
+          return mappedValue;
+        });
+        /**
+         * oneOf means that only one of the attributes
+         * should be defined from the data source
+         */
+        resolvedValue = results.filter((item) => item)[0][mainKey];
       } else {
-        resolvedValue = value.properties
-          ? mapper(input, value.properties)
-          : value.defaultValue;
+        if (value.staticValue !== undefined) {
+          mappedObject[key] = value.staticValue;
+          continue;
+        }
+
+        if (value.mapItems !== undefined) {
+          mapItems = getMapItems(input, value.mapItems);
+          hasMapItems = typeof mapItems !== "undefined";
+        }
+
+        if (value.filter !== undefined) {
+          filteredValue = filterSource(input, value);
+          mapItems = getMapItems(filteredValue, value.mapItems);
+          hasMapItems = typeof mapItems !== "undefined" || null;
+        }
+
+        // apply beforeMapping plugins
+        if (plugins) {
+          mapItems = plugins.beforeMapping(mapItems);
+        }
+
+        if (hasMapItems) {
+          switch (dataType) {
+            case "set":
+              if (Array.isArray(mapItems)) {
+                resolvedValue = mapItems.reduce(
+                  (prev, input) => [...prev, this.map(input, value.properties)],
+                  []
+                );
+              }
+              break;
+            case "tag":
+              resolvedValue = getTag(mapItems);
+              break;
+            case "set(strings)":
+              resolvedValue = getPrimitivesSet(
+                mapItems,
+                value.properties.mapItems
+              );
+              break;
+            case "boolean":
+              resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
+              if (resolvedValue === "true") {
+                resolvedValue = true;
+              }
+              if (resolvedValue === "false") {
+                resolvedValue = false;
+              }
+              break;
+            case "number":
+              resolvedValue = mapValueRules(value.mappingValueRules, mapItems);
+              if (!isNaN(resolvedValue)) {
+                resolvedValue = +resolvedValue;
+              }
+              break;
+            default:
+              resolvedValue = value.properties
+                ? this.map(mapItems, value.properties)
+                : mapValueRules(value.mappingValueRules, mapItems);
+              break;
+          }
+        } else {
+          resolvedValue = value.properties
+            ? this.map(input, value.properties)
+            : value.defaultValue;
+        }
+      }
+
+      // apply afterMapping plugins
+      if (plugins) {
+        resolvedValue = plugins.afterMapping(resolvedValue);
+      }
+
+      if (typeof resolvedValue !== "undefined") {
+        mappedObject[key] = resolvedValue;
       }
     }
 
-    if (typeof resolvedValue !== "undefined") {
-      mappedObject[key] = resolvedValue;
+    if (!isEmpty(mappedObject)) {
+      return mappedObject;
     }
-  }
+  };
+}
 
-  if (!isEmpty(mappedObject)) {
-    return mappedObject;
-  }
-};
-
-module.exports = mapper;
+module.exports = Mapper;
