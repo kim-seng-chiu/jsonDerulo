@@ -1,12 +1,17 @@
 /** @format */
 
-const mapper = require("../../src/mapper");
+const Mapper = require("../../src/mapper");
 const { input1, input2, input3 } = require("../mocks/mapper/data.mock");
 const { bookTemplate } = require("../mocks/mapper/template.mock");
 describe("mapper", () => {
+  let mapper;
+  beforeAll(() => {
+    mapper = new Mapper();
+  });
+
   describe("When given an input object and a template to match", () => {
     it("Should map the input object the new template keys and return it as an object", () => {
-      expect(mapper(input1, bookTemplate)).toMatchObject({
+      expect(mapper.map(input1, bookTemplate)).toMatchObject({
         Title: "Catcher in the Rye",
         Author: { Name: "J.D. Salinger", Origin: "USA" },
         YearPublished: "1951",
@@ -15,7 +20,7 @@ describe("mapper", () => {
       });
     });
     it("Should map the input object to new template keys with the desired data structure", () => {
-      expect(mapper(input2, bookTemplate)).toMatchObject({
+      expect(mapper.map(input2, bookTemplate)).toMatchObject({
         Title: "Nineteen Eighty-Four",
         Author: { Name: "George Orwell", Origin: "England" },
         YearPublished: "1949",
@@ -24,7 +29,7 @@ describe("mapper", () => {
       });
     });
     it("Should map the input object to new template keys with the desired data structure", () => {
-      expect(mapper(input3, bookTemplate)).toMatchObject({
+      expect(mapper.map(input3, bookTemplate)).toMatchObject({
         OverallRating: 95,
         AdditionalInfo: {
           Genre: "Business & Commerce",
@@ -51,7 +56,7 @@ describe("mapper", () => {
         configuration: {},
       };
 
-      const result = mapper(input, template);
+      const result = mapper.map(input, template);
       const expected = { provider: "aws" };
       expect(result).toStrictEqual(expected);
     });
@@ -90,7 +95,7 @@ describe("mapper", () => {
         configuration: { object_lock_enabled: true },
       };
 
-      const result = mapper(input, template);
+      const result = mapper.map(input, template);
       const expected = {
         ObjectLockEnabled: "Enabled",
       };
@@ -175,7 +180,7 @@ describe("mapper", () => {
           },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
 
         const expected = {
           Rules: [
@@ -217,7 +222,7 @@ describe("mapper", () => {
           },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           Rules: [
             {
@@ -261,7 +266,7 @@ describe("mapper", () => {
           },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           Rules: [
             {
@@ -297,7 +302,7 @@ describe("mapper", () => {
           },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           Rules: [
             {
@@ -322,7 +327,7 @@ describe("mapper", () => {
           },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           Rules: [
             {
@@ -372,7 +377,7 @@ describe("mapper", () => {
         },
       };
       it("SHOULD map a single value from each object", () => {
-        expect(mapper(testData1, schemaSetStrings)).toMatchObject({
+        expect(mapper.map(testData1, schemaSetStrings)).toMatchObject({
           configuration: {
             Name: "Test1",
             Subnets: ["aws_subnet.example1", "aws_subnet.example2"],
@@ -388,7 +393,7 @@ describe("mapper", () => {
         },
       };
       it("SHOULD return the array of strings", () => {
-        expect(mapper(testData2, schemaSetStrings)).toMatchObject({
+        expect(mapper.map(testData2, schemaSetStrings)).toMatchObject({
           configuration: {
             Name: "Test2",
             Subnets: ["198.0.1.15/1", "20.0.1.23/1"],
@@ -730,7 +735,7 @@ describe("mapper", () => {
       },
     };
     it("SHOULD return each value attached to its relevant attribute", () => {
-      expect(mapper(original, schema)).toMatchObject(result);
+      expect(mapper.map(original, schema)).toMatchObject(result);
     });
   });
   describe("GIVEN an attribute that can be mapped from two different sources", () => {
@@ -829,7 +834,7 @@ describe("mapper", () => {
         profile: "hr",
         name: "Phil",
       };
-      const result = mapper(data, schema);
+      const result = mapper.map(data, schema);
       const expected = {
         CannedProfile: [
           {
@@ -956,7 +961,7 @@ describe("mapper", () => {
         },
         first_name: "Gloria",
       };
-      const result = mapper(data, schema);
+      const result = mapper.map(data, schema);
       const expected = {
         CannedProfile: [
           {
@@ -1092,7 +1097,7 @@ describe("mapper", () => {
           },
           first_name: "Gloria",
         };
-        const result = mapper(data, schema);
+        const result = mapper.map(data, schema);
         const expected = {
           CannedProfile: [
             {
@@ -1141,7 +1146,7 @@ describe("mapper", () => {
           configuration: { make_me_a_boolean: "true" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           MakeMeABoolean: true,
         };
@@ -1151,7 +1156,7 @@ describe("mapper", () => {
         const input2 = {
           configuration: { make_me_a_boolean: "false" },
         };
-        const result2 = mapper(input, template);
+        const result2 = mapper.map(input, template);
         const expected2 = {
           MakeMeABoolean: false,
         };
@@ -1171,8 +1176,7 @@ describe("mapper", () => {
                 properties: {
                   DontMakeMeABoolean: {
                     type: "boolean",
-                    mapItems: ["configuration.dont_make_me_a_boolean"]
-                    
+                    mapItems: ["configuration.dont_make_me_a_boolean"],
                   },
                 },
               },
@@ -1184,7 +1188,7 @@ describe("mapper", () => {
           configuration: { dont_make_me_a_boolean: "1" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           DontMakeMeABoolean: "1",
         };
@@ -1222,7 +1226,7 @@ describe("mapper", () => {
           configuration: { dont_make_me_a_boolean: "true" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           DontMakeMeABoolean: "Enabled",
         };
@@ -1256,7 +1260,7 @@ describe("mapper", () => {
           configuration: { make_me_a_number: "128" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           MakeMeANumber: 128,
         };
@@ -1288,7 +1292,7 @@ describe("mapper", () => {
           configuration: { dont_make_me_a_number: "the128" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           DontMakeMeANumber: "the128",
         };
@@ -1327,13 +1331,151 @@ describe("mapper", () => {
           configuration: { dont_make_me_a_number: "128" },
         };
 
-        const result = mapper(input, template);
+        const result = mapper.map(input, template);
         const expected = {
           DontMakeMeANumber: "Standard",
         };
         expect(result.configuration.ObjectLockConfiguration).toStrictEqual(
           expected
         );
+      });
+    });
+  });
+
+  describe("GIVEN expected attribute with plugins", () => {
+    describe("WHEN use the plugin with beforeMapping hook", () => {
+      const plugins = [
+        {
+          id: "map_data_item",
+          beforeMapping: (mapItems) => {
+            return mapItems.map((x) => ({
+              name: x,
+              author: "Leo",
+            }));
+          },
+        },
+      ];
+
+      const template = {
+        configuration: {
+          type: "object",
+          properties: {
+            Books: {
+              type: "set",
+              mapItems: ["configuration.books"],
+              plugins: "map_data_item",
+              properties: {
+                name: {
+                  type: "string",
+                  mapItems: ["name"],
+                },
+                author: {
+                  type: "string",
+                  mapItems: ["author"],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const input = {
+        configuration: { books: ["Book 1", "Book 2", "Book 3"] },
+      };
+
+      const mapper = new Mapper({ plugins });
+      const result = mapper.map(input, template);
+
+      it("SHOULD return correct resolved value", () => {
+        expect(result.configuration.Books).toStrictEqual([
+          {
+            author: "Leo",
+            name: "Book 1",
+          },
+          {
+            author: "Leo",
+            name: "Book 2",
+          },
+          {
+            author: "Leo",
+            name: "Book 3",
+          },
+        ]);
+      });
+    });
+
+    describe("WHEN use the plugin with afterMapping hook", () => {
+      const plugins = [
+        {
+          id: "book_plugin", // books dataset transforming plugin
+          beforeMapping: (mapItems) => { // zip the books array and prices array and make them a new object array
+            const zipped = mapItems.books.map(function (e, i) {
+              return [e, mapItems.prices[i]];
+            });
+            return zipped.map((x) => ({
+              name: x[0],
+              price: x[1],
+            }));
+          },
+          afterMapping: (resolvedValue) => { // sort books by their price and add ranking number for them
+            resolvedValue.sort((x, y) => y.price - x.price);
+            return resolvedValue.map((x, index) => {
+              return {
+                rank: index + 1,
+                book: x.name,
+                price: x.price,
+              };
+            });
+          },
+        },
+        {
+          id: "upperCase_plugin", // string format plugin, convert string to upper-cased
+          afterMapping: (resolvedValue) => resolvedValue.toUpperCase(),
+        },
+      ];
+
+      const template = {
+        configuration: {
+          type: "object",
+          properties: {
+            BookPriceRanking: {
+              type: "set",
+              mapItems: ["configuration"],
+              properties: {
+                name: {
+                  type: "string",
+                  mapItems: ["name"],
+                  plugins: "upperCase_plugin",
+                },
+                price: {
+                  type: "number",
+                  mapItems: ["price"],
+                },
+              },
+              plugins: "book_plugin",
+            },
+          },
+        },
+      };
+
+      const input = {
+        configuration: {
+          books: ["Book 1", "Book 2", "Book 3"],
+          prices: [11.5, 20.8, 7.99],
+        },
+      };
+
+      const mapper = new Mapper({ plugins });
+      const result = mapper.map(input, template);
+
+      it("SHOULD return correct resolved value", () => {
+        expect(result.configuration).toStrictEqual({
+          BookPriceRanking: [
+            { rank: 1, book: "BOOK 2", price: 20.8 },
+            { rank: 2, book: "BOOK 1", price: 11.5 },
+            { rank: 3, book: "BOOK 3", price: 7.99 },
+          ],
+        });
       });
     });
   });
