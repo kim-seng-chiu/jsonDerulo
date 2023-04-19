@@ -200,7 +200,7 @@ function Mapper(options) {
               break;
           }
         } else {
-          resolvedValue = value.properties
+          resolvedValue = value.properties && value.type === "object"
             ? this.map(input, value.properties)
             : value.defaultValue;
         }
