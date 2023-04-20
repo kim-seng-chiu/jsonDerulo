@@ -2,7 +2,7 @@ const builtinPlugins = {
   length: {
     id: "length",
     afterMapping: (data) => {
-      if (Array.isArray) {
+      if (Array.isArray(data)) {
         return data.length;
       } else if (typeof data === "object" && data !== null) {
         return 1;
